@@ -8,7 +8,7 @@ import { Listener } from './core/listener/Listener'
 import { RowFlex } from './dataset/enum/Row'
 import { ImageDisplay, LocationPosition } from './dataset/enum/Common'
 import { ElementType } from './dataset/enum/Element'
-import { formatElementList } from './utils/element'
+import { formatElementList, getElementListByHTML } from './utils/element'
 import { Register } from './core/register/Register'
 import { ContextMenu } from './core/contextmenu/ContextMenu'
 import {
@@ -59,6 +59,7 @@ export default class Editor {
   public listener: Listener
   public eventBus: EventBus<EventBusMap>
   public override: Override
+  public draw: Draw
   public register: Register
   public destroy: () => void
   public use: UsePlugin
@@ -99,7 +100,7 @@ export default class Editor {
     // 重写
     this.override = new Override()
     // 启动
-    const draw = new Draw(
+    this.draw = new Draw(
       container,
       editorOptions,
       {
@@ -112,20 +113,20 @@ export default class Editor {
       this.override
     )
     // 命令
-    this.command = new Command(new CommandAdapt(draw))
+    this.command = new Command(new CommandAdapt(this.draw))
     // 菜单
-    const contextMenu = new ContextMenu(draw, this.command)
+    const contextMenu = new ContextMenu(this.draw, this.command)
     // 快捷键
-    const shortcut = new Shortcut(draw, this.command)
+    const shortcut = new Shortcut(this.draw, this.command)
     // 注册
     this.register = new Register({
       contextMenu,
       shortcut,
-      i18n: draw.getI18n()
+      i18n: this.draw.getI18n()
     })
     // 注册销毁方法
     this.destroy = () => {
-      draw.destroy()
+      this.draw.destroy()
       shortcut.removeEvent()
       contextMenu.removeEvent()
     }
@@ -136,7 +137,7 @@ export default class Editor {
 }
 
 // 对外方法
-export { splitText }
+export { splitText, getElementListByHTML }
 
 // 对外常量
 export { EDITOR_COMPONENT, LETTER_CLASS, INTERNAL_CONTEXT_MENU_KEY }
