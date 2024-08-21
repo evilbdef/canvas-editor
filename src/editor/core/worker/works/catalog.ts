@@ -2,6 +2,7 @@ import { ICatalog, ICatalogItem } from '../../../interface/Catalog'
 import { IElement } from '../../../interface/Element'
 
 enum ElementType {
+  HTML = 'html',
   TEXT = 'text',
   IMAGE = 'image',
   TABLE = 'table',
@@ -40,6 +41,7 @@ const titleOrderNumberMapping: Record<TitleLevel, number> = {
 }
 
 const TEXTLIKE_ELEMENT_TYPE: ElementType[] = [
+  ElementType.HTML,
   ElementType.TEXT,
   ElementType.HYPERLINK,
   ElementType.SUBSCRIPT,

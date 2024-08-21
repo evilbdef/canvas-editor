@@ -15,6 +15,7 @@ import {
   ImageDisplay,
   ListStyle,
   ListType,
+  PaperDirection,
   RowFlex,
   TableBorder,
   TdBorder
@@ -198,6 +199,16 @@ export function formatElementList(
           i++
         }
       }
+      i--
+    } else if (el.type === ElementType.HTML) {
+      // html 转换成 元素节点
+      const { margins, paperDirection } = options.editorOptions
+      const _width = paperDirection === PaperDirection.VERTICAL ? options.editorOptions.width : options.editorOptions.height;
+      const _margins = (paperDirection === PaperDirection.VERTICAL ? margins : [margins[1], margins[2], margins[3], margins[0]])
+      const innerWidth = (_width - _margins[1] - _margins[3]) * options.editorOptions.scale
+      const eleList = getElementListByHTML(el.value, { innerWidth })
+      // 删当前节点并追加节点
+      elementList.splice(i, 1, ...eleList)
       i--
     } else if (el.type === ElementType.DATE) {
       // 移除父节点
