@@ -2,10 +2,10 @@
   "name": "@hufe921/canvas-editor",
   "author": "Hufe",
   "license": "MIT",
-  "version": "0.9.90",
+  "version": "0.9.90-mt",
   "description": "rich text editor by canvas/svg",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
+    "registry": "http://192.168.1.19:9876/repository/npm-local/",
     "access": "public"
   },
   "files": [
@@ -46,7 +46,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "postinstall": "simple-git-hooks",
-    "release": "node scripts/release.js"
+    "release": "bash scripts/release.sh"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^10.0.1",
