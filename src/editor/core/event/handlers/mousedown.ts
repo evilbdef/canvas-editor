@@ -220,7 +220,7 @@ export function mousedown(evt: MouseEvent, host: CanvasEvent) {
   // 超链接
   const hyperlinkParticle = draw.getHyperlinkParticle()
   hyperlinkParticle.clearHyperlinkPopup()
-  if (curElement.type === ElementType.HYPERLINK) {
+  if (curElement.type === ElementType.HYPERLINK || curElement.url) {
     if (isMod(evt)) {
       hyperlinkParticle.openHyperlink(curElement)
     } else {

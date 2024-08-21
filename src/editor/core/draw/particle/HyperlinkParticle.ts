@@ -5,6 +5,7 @@ import { IElementPosition } from '../../../interface/Element'
 import { IRowElement } from '../../../interface/Row'
 import { Draw } from '../Draw'
 
+const JAVASCRIPT_LINK = 'javascript:';
 export class HyperlinkParticle {
   private draw: Draw
   private options: Required<IEditorOption>
@@ -52,6 +53,7 @@ export class HyperlinkParticle {
     this.hyperlinkDom.href = url
     this.hyperlinkDom.title = url
     this.hyperlinkDom.innerText = url
+    this.hyperlinkDom.target = url.startsWith(JAVASCRIPT_LINK) ? '_self' : '_blank';
   }
 
   public clearHyperlinkPopup() {
@@ -59,9 +61,14 @@ export class HyperlinkParticle {
   }
 
   public openHyperlink(element: IElement) {
-    const newTab = window.open(element.url, '_blank')
-    if (newTab) {
-      newTab.opener = null
+    if (element.url?.startsWith(JAVASCRIPT_LINK)) {
+      // 执行脚本
+      eval(element.url.substring(JAVASCRIPT_LINK.length))
+    } else {
+      const newTab = window.open(element.url, '_blank')
+      if (newTab) {
+        newTab.opener = null
+      }
     }
   }
 
