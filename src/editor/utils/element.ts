@@ -1010,6 +1010,22 @@ export function createDomFromElementList(
 ) {
   function buildDom(payload: IElement[]): HTMLDivElement {
     const clipboardDom = document.createElement('div')
+    let paragraphDom: HTMLElement = undefined!;
+    // 根据不同情况，区分添加到段落还是添加的正文流
+    function appendDom(childDom: HTMLElement, isAppendToParagraph = true) {
+      if (isAppendToParagraph) {
+        if (paragraphDom == undefined) paragraphDom = document.createElement('p')
+        paragraphDom.append(childDom);
+      } else {
+        if (paragraphDom) {
+          clipboardDom.append(paragraphDom);
+          paragraphDom = undefined!;
+        }
+        if (childDom) {
+          clipboardDom.append(childDom);
+        }
+      }
+    }
     for (let e = 0; e < payload.length; e++) {
       const element = payload[e]
       // 构造表格
@@ -1073,21 +1089,21 @@ export function createDomFromElementList(
           }
           tableDom.append(trDom)
         }
-        clipboardDom.append(tableDom)
+        appendDom(tableDom, false)
       } else if (element.type === ElementType.HYPERLINK) {
         const a = document.createElement('a')
         a.innerText = element.valueList!.map(v => v.value).join('')
         if (element.url) {
           a.href = element.url
         }
-        clipboardDom.append(a)
+        appendDom(a)
       } else if (element.type === ElementType.TITLE) {
         const h = document.createElement(
           `h${titleOrderNumberMapping[element.level!]}`
         )
         const childDom = buildDom(element.valueList!)
         h.innerHTML = childDom.innerHTML
-        clipboardDom.append(h)
+        appendDom(h, false)
       } else if (element.type === ElementType.LIST) {
         const list = document.createElement(
           listTypeElementMapping[element.listType!]
@@ -1104,7 +1120,7 @@ export function createDomFromElementList(
           li.innerHTML = childDom.innerHTML
           list.append(li)
         })
-        clipboardDom.append(list)
+        appendDom(list, false)
       } else if (element.type === ElementType.IMAGE) {
         const img = document.createElement('img')
         if (element.value) {
@@ -1112,33 +1128,33 @@ export function createDomFromElementList(
           img.width = element.width!
           img.height = element.height!
         }
-        clipboardDom.append(img)
+        appendDom(img)
       } else if (element.type === ElementType.SEPARATOR) {
         const hr = document.createElement('hr')
-        clipboardDom.append(hr)
+        appendDom(hr, false)
       } else if (element.type === ElementType.CHECKBOX) {
         const checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
         if (element.checkbox?.value) {
           checkbox.setAttribute('checked', 'true')
         }
-        clipboardDom.append(checkbox)
+        appendDom(checkbox)
       } else if (element.type === ElementType.RADIO) {
         const radio = document.createElement('input')
         radio.type = 'radio'
         if (element.radio?.value) {
           radio.setAttribute('checked', 'true')
         }
-        clipboardDom.append(radio)
+        appendDom(radio)
       } else if (element.type === ElementType.TAB) {
         const tab = document.createElement('span')
         tab.innerHTML = `${NON_BREAKING_SPACE}${NON_BREAKING_SPACE}`
-        clipboardDom.append(tab)
+        appendDom(tab)
       } else if (element.type === ElementType.CONTROL) {
         const controlElement = document.createElement('span')
         const childDom = buildDom(element.control?.value || [])
         controlElement.innerHTML = childDom.innerHTML
-        clipboardDom.append(controlElement)
+        appendDom(controlElement)
       } else if (
         !element.type ||
         element.type === ElementType.LATEX ||
@@ -1151,15 +1167,25 @@ export function createDomFromElementList(
           text = element.value
         }
         if (!text) continue
-        const dom = convertElementToDom(element, options)
         // 前一个元素是标题，移除首行换行符
         if (payload[e - 1]?.type === ElementType.TITLE) {
           text = text.replace(/^\n/, '')
         }
-        dom.innerText = text.replace(new RegExp(`${ZERO}`, 'g'), '\n')
-        clipboardDom.append(dom)
+        if (!text) continue
+        const dom = convertElementToDom(element, options)
+        text = text.replace(new RegExp(`${ZERO}`, 'g'), '\n');
+        dom.innerText = text;
+        // 全部以 \n 为内容的意为段落结束
+        const isAppendToParagraph = !/^\n*$/.test(text);
+        appendDom(isAppendToParagraph ? dom : undefined!, isAppendToParagraph);
+        if (element.rowMargin && paragraphDom) {
+          // 段落行间距特殊处理，需带上 fontsize 做倍数
+          paragraphDom.style.lineHeight = element.rowMargin + '';
+          paragraphDom.style.fontSize = dom.style.fontSize;
+        }
       }
     }
+    if (paragraphDom) clipboardDom.append(paragraphDom); // 最末尾的内容
     return clipboardDom
   }
   // 按行布局分类创建dom
