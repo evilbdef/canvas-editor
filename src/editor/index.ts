@@ -90,7 +90,8 @@ export default class Editor {
     ]
     pageComponentData.forEach(elementList => {
       formatElementList(elementList, {
-        editorOptions
+        editorOptions,
+        isForceCompensation: true
       })
     })
     // 监听
