@@ -1129,6 +1129,10 @@ export function createDomFromElementList(
           img.height = element.height!
         }
         appendDom(img)
+      } else if (element.type === ElementType.PAGE_BREAK) {
+        const pb = document.createElement('span')
+        pb.innerHTML = `<br clear=all style='page-break-before:always'/>`
+        appendDom(pb, false)
       } else if (element.type === ElementType.SEPARATOR) {
         const hr = document.createElement('hr')
         appendDom(hr, false)

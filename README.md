@@ -65,3 +65,7 @@ new Editor(document.querySelector('.canvas-editor'), {
 #### lib
 
 `npm run lib`
+
+#### publish to matech
+
+`npm run release`
