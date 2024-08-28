@@ -1241,6 +1241,7 @@ export function convertTextNodeToElement(
   if (!value || anchorNode.nodeName === 'STYLE') return null
   const element: IElement = {
     value,
+    font: style.fontFamily,
     color: style.color,
     bold: Number(style.fontWeight) > 500,
     italic: style.fontStyle.includes('italic'),
