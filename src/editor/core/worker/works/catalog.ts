@@ -1,5 +1,14 @@
 import { ICatalog, ICatalogItem } from '../../../interface/Catalog'
-import { IElement } from '../../../interface/Element'
+import { IElement, IElementPosition } from '../../../interface/Element'
+
+interface IGetCatalogPayload {
+  elementList: IElement[]
+  positionList: IElementPosition[]
+}
+
+type ICatalogElement = IElement & {
+  pageNo: number
+}
 
 enum ElementType {
   HTML = 'html',
@@ -56,20 +65,22 @@ function isTextLikeElement(element: IElement): boolean {
   return !element.type || TEXTLIKE_ELEMENT_TYPE.includes(element.type)
 }
 
-function getCatalog(elementList: IElement[]): ICatalog | null {
+function getCatalog(payload: IGetCatalogPayload): ICatalog | null {
+  const { elementList, positionList } = payload
   // 筛选标题
-  const titleElementList: IElement[] = []
+  const titleElementList: ICatalogElement[] = []
   let t = 0
   while (t < elementList.length) {
     const element = elementList[t]
     if (element.titleId) {
       const titleId = element.titleId
       const level = element.level
-      const titleElement: IElement = {
+      const titleElement: ICatalogElement = {
         type: ElementType.TITLE,
         value: '',
         level,
-        titleId
+        titleId,
+        pageNo: positionList[t].pageNo
       }
       const valueList: IElement[] = []
       while (t < elementList.length) {
@@ -92,7 +103,10 @@ function getCatalog(elementList: IElement[]): ICatalog | null {
   }
   if (!titleElementList.length) return null
   // 查找到比最新元素大的标题时终止
-  const recursiveInsert = (title: IElement, catalogItem: ICatalogItem) => {
+  const recursiveInsert = (
+    title: ICatalogElement,
+    catalogItem: ICatalogItem
+  ) => {
     const subCatalogItem =
       catalogItem.subCatalog[catalogItem.subCatalog.length - 1]
     const catalogItemLevel = titleOrderNumberMapping[subCatalogItem?.level]
@@ -104,6 +118,7 @@ function getCatalog(elementList: IElement[]): ICatalog | null {
         id: title.titleId!,
         name: title.value,
         level: title.level!,
+        pageNo: title.pageNo,
         subCatalog: []
       })
     }
@@ -124,6 +139,7 @@ function getCatalog(elementList: IElement[]): ICatalog | null {
         id: title.titleId!,
         name: title.value,
         level: title.level!,
+        pageNo: title.pageNo,
         subCatalog: []
       })
     }
@@ -132,7 +148,7 @@ function getCatalog(elementList: IElement[]): ICatalog | null {
 }
 
 onmessage = evt => {
-  const elementList = <IElement[]>evt.data
-  const catalog = getCatalog(elementList)
+  const payload = <IGetCatalogPayload>evt.data
+  const catalog = getCatalog(payload)
   postMessage(catalog)
 }
