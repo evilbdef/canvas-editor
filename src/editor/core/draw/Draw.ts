@@ -1224,10 +1224,15 @@ export class Draw {
   }
 
   public getElementRowMargin(el: IElement) {
-    const { defaultBasicRowMarginHeight, defaultRowMargin, scale } =
-      this.options
+    const { defaultBasicRowMarginHeight, defaultRowMargin, scale } = this.options;
+    let rowMargin = el.rowMargin;
+    if (typeof rowMargin === 'string' && rowMargin.endsWith('pt')) {
+      // pt 转成 px
+      const baseFontSize = parseFloat(getComputedStyle(document.body).fontSize);
+      rowMargin = parseFloat(rowMargin) * 96 / 72 / baseFontSize;
+    }
     return (
-      defaultBasicRowMarginHeight * (el.rowMargin ?? defaultRowMargin) * scale
+      defaultBasicRowMarginHeight * (<number>rowMargin || defaultRowMargin) * scale
     )
   }
 
@@ -1279,8 +1284,13 @@ export class Draw {
     for (let i = 0; i < elementList.length; i++) {
       const curRow: IRow = rowList[rowList.length - 1]
       const element = elementList[i]
-      const rowMargin =
-        defaultBasicRowMarginHeight * (element.rowMargin ?? defaultRowMargin)
+      let rowMargin = element.rowMargin;
+      if (typeof rowMargin === 'string' && rowMargin.endsWith('pt')) {
+        // pt 转成 px
+        const baseFontSize = parseFloat(getComputedStyle(document.body).fontSize);
+        rowMargin = parseFloat(rowMargin) * 96 / 72 / baseFontSize;
+      }
+      rowMargin = defaultBasicRowMarginHeight * (<number>rowMargin ?? defaultRowMargin)
       const metrics: IElementMetrics = {
         width: 0,
         height: 0,

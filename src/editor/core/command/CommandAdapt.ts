@@ -755,7 +755,7 @@ export class CommandAdapt {
     this.draw.render({ curIndex, isSetCursor })
   }
 
-  public rowMargin(payload: number) {
+  public rowMargin(payload: number | string) {
     const isReadonly = this.draw.isReadonly()
     if (isReadonly) return
     const { startIndex, endIndex } = this.range.getRange()

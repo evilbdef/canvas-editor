@@ -332,7 +332,7 @@ window.onload = function () {
   }
   rowOptionDom.onclick = function (evt) {
     const li = evt.target as HTMLLIElement
-    instance.command.executeRowMargin(Number(li.dataset.rowmargin!))
+    instance.command.executeRowMargin(li.dataset.rowmargin! as any)
   }
 
   const listDom = document.querySelector<HTMLDivElement>('.menu-item__list')!

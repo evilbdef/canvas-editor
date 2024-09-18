@@ -34,7 +34,7 @@ export interface IElementStyle {
   underline?: boolean
   strikeout?: boolean
   rowFlex?: RowFlex
-  rowMargin?: number
+  rowMargin?: number | string
   letterSpacing?: number
   textDecoration?: ITextDecoration
 }
