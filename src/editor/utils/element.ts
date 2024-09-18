@@ -1180,16 +1180,42 @@ export function createDomFromElementList(
           text = text.replace(/^\n/, '')
         }
         if (!text) continue
-        const dom = convertElementToDom(element, options)
         text = text.replace(new RegExp(`${ZERO}`, 'g'), '\n');
-        dom.innerText = text;
-        // 全部以 \n 为内容的意为段落结束
-        const isAppendToParagraph = !/^\n*$/.test(text);
-        appendDom(isAppendToParagraph ? dom : undefined!, isAppendToParagraph);
+        const dom = convertElementToDom(element, options);
+        // let dom: HTMLElement;
+        // const splits = text.split('\n');
+        // if (splits.length > 1) {
+        //   // 有换行符，替换成段落
+        //   splits.forEach((_str, _idx) => {
+        //     if (!(_idx === splits.length - 1 && '' === _str)) {
+        //       dom = convertElementToDom(element, options);
+        //       dom.innerText = _str || '\n';
+        //       appendDom(dom);
+        //       appendDom(undefined!, false); // 结束段落
+        //     }
+        //   });
+        // } else {
+        //   dom = convertElementToDom(element, options);
+        //   dom.innerText = text;
+        //   appendDom(dom); // 普通内容，添加到段落
+        // }
+        if (/^\n+$/.test(text)) {
+          text = text.replace(/^\n/, ''); // 移除一个换行符
+          if (text) {
+            // if ('\n' !== text) {
+            dom.innerText = text;
+            dom.querySelector<HTMLBRElement>('br:last-child')!.style.display = 'inline-block'; // 把最后一个换行符增加个标识，供后面导出Docx时增加一个br
+            appendDom(dom);
+          }
+          appendDom(undefined!, false); // 结束段落
+        } else {
+          dom.innerText = text;
+          appendDom(dom); // 普通内容，添加到段落
+        }
         if (element.rowMargin && paragraphDom) {
           // 段落行间距特殊处理，需带上 fontsize 做倍数
           paragraphDom.style.lineHeight = element.rowMargin + '';
-          paragraphDom.style.fontSize = dom.style.fontSize;
+          paragraphDom.style.fontSize = dom!.style.fontSize;
         }
       }
     }
