@@ -1,6 +1,6 @@
-import { commentList, data, options } from './mock'
-import './style.css'
 import prism from 'prismjs'
+import { Dialog } from './components/dialog/Dialog'
+import { Signature } from './components/signature/Signature'
 import Editor, {
   BlockType,
   Command,
@@ -16,15 +16,14 @@ import Editor, {
   ListType,
   PageMode,
   PaperDirection,
-  RowFlex,
-  TextDecorationStyle,
-  TitleLevel,
-  splitText
+  RowFlex, splitText, TextDecorationStyle,
+  TitleLevel
 } from './editor'
-import { Dialog } from './components/dialog/Dialog'
-import { formatPrismToken } from './utils/prism'
-import { Signature } from './components/signature/Signature'
+import { IMarginUnit } from './editor/interface/Margin'
+import { commentList, data, options } from './mock'
+import './style.css'
 import { debounce, nextTick, scrollIntoView } from './utils'
+import { formatPrismToken } from './utils/prism'
 
 window.onload = function () {
   const isApple =
@@ -342,8 +341,12 @@ window.onload = function () {
     console.log('list')
     listOptionDom.classList.toggle('visible')
   }
-  listOptionDom.onclick = function (evt) {
+  listOptionDom.onclick = function (evt): any {
     const li = evt.target as HTMLLIElement
+    if (li.classList.contains('option-group')) {
+      evt.stopPropagation();
+      return false;
+    }
     const listType = <ListType>li.dataset.listType || null
     const listStyle = <ListStyle>(<unknown>li.dataset.listStyle)
     instance.command.executeList(listType, listStyle)
@@ -1312,42 +1315,67 @@ window.onload = function () {
   const paperMarginDom =
     document.querySelector<HTMLDivElement>('.paper-margin')!
   paperMarginDom.onclick = function () {
-    const [topMargin, rightMargin, bottomMargin, leftMargin] =
-      instance.command.getPaperMargin()
+    const pMargin = instance.command.getPaperMargin()
+    const options = [
+      {
+        label: '像素',
+        value: 'px'
+      },
+      {
+        label: '磅',
+        value: 'pt'
+      },
+      {
+        label: '厘米',
+        value: 'cm'
+      }
+    ]
     new Dialog({
       title: '页边距',
       data: [
         {
-          type: 'text',
+          type: 'text-select',
           label: '上边距',
           name: 'top',
           required: true,
-          value: `${topMargin}`,
-          placeholder: '请输入上边距'
+          value: `${pMargin.top}`,
+          placeholder: '请输入上边距',
+          name2: 'topUnit',
+          value2: pMargin.topUnit || 'px',
+          options
         },
         {
-          type: 'text',
+          type: 'text-select',
           label: '下边距',
           name: 'bottom',
           required: true,
-          value: `${bottomMargin}`,
-          placeholder: '请输入下边距'
+          value: `${pMargin.bottom}`,
+          placeholder: '请输入下边距',
+          name2: 'bottomUnit',
+          value2: pMargin.bottomUnit || 'px',
+          options
         },
         {
-          type: 'text',
+          type: 'text-select',
           label: '左边距',
           name: 'left',
           required: true,
-          value: `${leftMargin}`,
-          placeholder: '请输入左边距'
+          value: `${pMargin.left}`,
+          placeholder: '请输入左边距',
+          name2: 'leftUnit',
+          value2: pMargin.leftUnit || 'px',
+          options
         },
         {
-          type: 'text',
+          type: 'text-select',
           label: '右边距',
           name: 'right',
           required: true,
-          value: `${rightMargin}`,
-          placeholder: '请输入右边距'
+          value: `${pMargin.right}`,
+          placeholder: '请输入右边距',
+          name2: 'rightUnit',
+          value2: pMargin.rightUnit || 'px',
+          options
         }
       ],
       onConfirm: payload => {
@@ -1359,12 +1387,16 @@ window.onload = function () {
         if (!left) return
         const right = payload.find(p => p.name === 'right')?.value
         if (!right) return
-        instance.command.executeSetPaperMargin([
-          Number(top),
-          Number(right),
-          Number(bottom),
-          Number(left)
-        ])
+        instance.command.executeSetPaperMargin({
+          top: parseFloat(top),
+          topUnit: <IMarginUnit>payload.find(p => p.name === 'topUnit')?.value || 'px',
+          right: parseFloat(right),
+          rightUnit: <IMarginUnit>payload.find(p => p.name === 'rightUnit')?.value || 'px',
+          bottom: parseFloat(bottom),
+          bottomUnit: <IMarginUnit>payload.find(p => p.name === 'bottomUnit')?.value || 'px',
+          left: parseFloat(left),
+          leftUnit: <IMarginUnit>payload.find(p => p.name === 'leftUnit')?.value || 'px'
+        })
       }
     })
   }
@@ -1627,15 +1659,13 @@ window.onload = function () {
 
     // 列表
     listOptionDom
-      .querySelectorAll<HTMLLIElement>('li')
+      .querySelectorAll<HTMLLIElement>('.option-item')
       .forEach(li => li.classList.remove('active'))
     if (payload.listType) {
       listDom.classList.add('active')
       const listType = payload.listType
-      const listStyle =
-        payload.listType === ListType.OL ? ListStyle.DECIMAL : payload.listType
       const curListDom = listOptionDom.querySelector<HTMLLIElement>(
-        `[data-list-type='${listType}'][data-list-style='${listStyle}']`
+        `[data-list-type='${listType}'][data-list-style='${payload.listStyle}']`
       )
       if (curListDom) {
         curListDom.classList.add('active')

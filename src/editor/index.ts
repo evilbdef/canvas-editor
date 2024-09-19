@@ -1,58 +1,53 @@
 import './assets/css/index.css'
-import { IEditorData, IEditorOption, IEditorResult } from './interface/Editor'
-import { IElement } from './interface/Element'
-import { Draw } from './core/draw/Draw'
 import { Command } from './core/command/Command'
 import { CommandAdapt } from './core/command/CommandAdapt'
-import { Listener } from './core/listener/Listener'
-import { RowFlex } from './dataset/enum/Row'
-import { ImageDisplay, LocationPosition } from './dataset/enum/Common'
-import { ElementType } from './dataset/enum/Element'
-import { formatElementList, getElementListByHTML } from './utils/element'
-import { Register } from './core/register/Register'
 import { ContextMenu } from './core/contextmenu/ContextMenu'
+import { Draw } from './core/draw/Draw'
+import { INavigateInfo } from './core/draw/interactive/Search'
+import { EventBus } from './core/event/eventbus/EventBus'
+import { Listener } from './core/listener/Listener'
+import { Override } from './core/override/Override'
+import { Plugin } from './core/plugin/Plugin'
+import { Register } from './core/register/Register'
+import { Shortcut } from './core/shortcut/Shortcut'
+import { LETTER_CLASS } from './dataset/constant/Common'
+import { INTERNAL_CONTEXT_MENU_KEY } from './dataset/constant/ContextMenu'
+import { EDITOR_COMPONENT } from './dataset/constant/Editor'
+import { BackgroundRepeat, BackgroundSize } from './dataset/enum/Background'
+import { BlockType } from './dataset/enum/Block'
+import { ImageDisplay, LocationPosition, MaxHeightRatio, NumberType } from './dataset/enum/Common'
+import { ControlIndentation, ControlType } from './dataset/enum/Control'
+import {
+  EditorComponent, EditorMode, EditorZone, PageMode,
+  PaperDirection, RenderMode, WordBreak
+} from './dataset/enum/Editor'
+import { ElementType } from './dataset/enum/Element'
+import { KeyMap } from './dataset/enum/KeyMap'
+import { LineNumberType } from './dataset/enum/LineNumber'
+import { ListStyle, ListType, OlStyle } from './dataset/enum/List'
+import { RowFlex } from './dataset/enum/Row'
+import { TableBorder, TdBorder, TdSlash } from './dataset/enum/table/Table'
+import { TextDecorationStyle } from './dataset/enum/Text'
+import { TitleLevel } from './dataset/enum/Title'
+import { VerticalAlign } from './dataset/enum/VerticalAlign'
+import { IBlock } from './interface/Block'
+import { ICatalog, ICatalogItem } from './interface/Catalog'
 import {
   IContextMenuContext,
   IRegisterContextMenu
 } from './interface/contextmenu/ContextMenu'
-import {
-  EditorComponent,
-  EditorZone,
-  EditorMode,
-  PageMode,
-  PaperDirection,
-  WordBreak,
-  RenderMode
-} from './dataset/enum/Editor'
-import { EDITOR_COMPONENT } from './dataset/constant/Editor'
-import { IWatermark } from './interface/Watermark'
-import { ControlIndentation, ControlType } from './dataset/enum/Control'
-import { INavigateInfo } from './core/draw/interactive/Search'
-import { Shortcut } from './core/shortcut/Shortcut'
-import { KeyMap } from './dataset/enum/KeyMap'
-import { BlockType } from './dataset/enum/Block'
-import { IBlock } from './interface/Block'
-import { ILang } from './interface/i18n/I18n'
-import { VerticalAlign } from './dataset/enum/VerticalAlign'
-import { TableBorder, TdBorder, TdSlash } from './dataset/enum/table/Table'
-import { MaxHeightRatio, NumberType } from './dataset/enum/Common'
-import { TitleLevel } from './dataset/enum/Title'
-import { ListStyle, ListType } from './dataset/enum/List'
-import { ICatalog, ICatalogItem } from './interface/Catalog'
-import { Plugin } from './core/plugin/Plugin'
-import { UsePlugin } from './interface/Plugin'
-import { EventBus } from './core/event/eventbus/EventBus'
+import { IEditorData, IEditorOption, IEditorResult } from './interface/Editor'
+import { IElement } from './interface/Element'
 import { EventBusMap } from './interface/EventBus'
+import { ILang } from './interface/i18n/I18n'
 import { IRangeStyle } from './interface/Listener'
-import { Override } from './core/override/Override'
-import { LETTER_CLASS } from './dataset/constant/Common'
-import { INTERNAL_CONTEXT_MENU_KEY } from './dataset/constant/ContextMenu'
+import { IMarginUnit } from './interface/Margin'
+import { UsePlugin } from './interface/Plugin'
 import { IRange } from './interface/Range'
-import { deepClone, splitText } from './utils'
-import { BackgroundRepeat, BackgroundSize } from './dataset/enum/Background'
-import { TextDecorationStyle } from './dataset/enum/Text'
-import { mergeOption } from './utils/option'
-import { LineNumberType } from './dataset/enum/LineNumber'
+import { IWatermark } from './interface/Watermark'
+import { deepClone, getListText, splitText } from './utils'
+import { formatElementList, getElementListByHTML } from './utils/element'
+import { mergeOption, parseMargin } from './utils/option'
 
 export default class Editor {
   public command: Command
@@ -138,11 +133,9 @@ export default class Editor {
 }
 
 // 对外方法
-export { splitText, getElementListByHTML }
-
+export { splitText, getElementListByHTML, parseMargin, getListText }
 // 对外常量
 export { EDITOR_COMPONENT, LETTER_CLASS, INTERNAL_CONTEXT_MENU_KEY }
-
 // 对外枚举
 export {
   Editor,
@@ -168,6 +161,7 @@ export {
   TitleLevel,
   ListType,
   ListStyle,
+  OlStyle,
   WordBreak,
   ControlIndentation,
   BackgroundRepeat,
@@ -176,7 +170,6 @@ export {
   LineNumberType,
   LocationPosition
 }
-
 // 对外类型
 export type {
   IElement,
@@ -192,5 +185,10 @@ export type {
   ICatalog,
   ICatalogItem,
   IRange,
-  IRangeStyle
+  IRangeStyle,
+  IMarginUnit,
 }
+
+
+
+

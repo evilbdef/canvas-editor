@@ -1,4 +1,6 @@
 import { UNICODE_SYMBOL_REG } from '../dataset/constant/Regular'
+import { KeyMap } from '../dataset/enum/KeyMap'
+import { ListStyle } from '../dataset/enum/List'
 import { IElementFillRect } from '../interface/Element'
 
 export function debounce<T extends unknown[]>(
@@ -249,6 +251,18 @@ export function convertNumberToChinese(num: number) {
   result = result.replace(/零+$/, '')
   result = result.replace(/^一十/g, '十')
   return result
+}
+export function getListText(listStyle: ListStyle, listIndex: number) {
+  switch(listStyle) {
+    case ListStyle.DECIMAL2: return `${listIndex}).`;
+    case ListStyle.DECIMAL3: return `(${listIndex}).`;
+    case ListStyle.DECIMAL_CN: return `${convertNumberToChinese(listIndex)}、`;
+    case ListStyle.DECIMAL_CN2: return `${convertNumberToChinese(listIndex)}）`;
+    case ListStyle.DECIMAL_CN3: return `（${convertNumberToChinese(listIndex)}）`;
+    case ListStyle.DECIMAL_CN4: return `（${convertNumberToChinese(listIndex)}）、`;
+    default:
+      return `${listIndex}${KeyMap.PERIOD}`
+  }
 }
 
 export function cloneProperty<T>(

@@ -141,18 +141,20 @@ ul {
   display: block;
 }
 
-.menu-item .options li {
+.menu-item .options > ul > li{
+  margin: 0;
   padding: 5px;
-  margin: 5px 0;
   user-select: none;
   transition: all .3s;
 }
 
-.menu-item .options li:hover {
+.menu-item .options li:not(.option-group):hover,
+.menu-item .options .option-item:hover {
   background-color: #ebecef;
 }
 
-.menu-item .options li.active {
+.menu-item .options li.active,
+.menu-item .options .option-item.active {
   background-color: #e2e6ed;
 }
 
@@ -363,12 +365,13 @@ ul {
   width: 110px;
 }
 
-.menu-item__list .options>ul>li * {
+.menu-item__list .options>ul>li *:not(.option-item) {
   pointer-events: none;
 }
 
 .menu-item__list .options>ul>li li {
   margin-left: 18px;
+  border-bottom: 1px solid;
 }
 
 .menu-item__list .options>ul>li[data-list-style='checkbox'] li::marker {

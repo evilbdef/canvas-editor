@@ -53,6 +53,7 @@ import { IControlSelect } from '../interface/Control'
 import { IRowElement } from '../interface/Row'
 import { ITd } from '../interface/table/Td'
 import { ITr } from '../interface/table/Tr'
+import { marginToArray } from './option'
 
 export function unzipElementList(elementList: IElement[]): IElement[] {
   const result: IElement[] = []
@@ -211,7 +212,8 @@ export function formatElementList(
       // html 转换成 元素节点
       const { margins, paperDirection } = options.editorOptions
       const _width = paperDirection === PaperDirection.VERTICAL ? options.editorOptions.width : options.editorOptions.height;
-      const _margins = (paperDirection === PaperDirection.VERTICAL ? margins : [margins[1], margins[2], margins[3], margins[0]])
+      // const _margins = (paperDirection === PaperDirection.VERTICAL ? margins : [margins[1], margins[2], margins[3], margins[0]])
+      const _margins = marginToArray(margins, paperDirection);
       const innerWidth = (_width - _margins[1] - _margins[3]) * options.editorOptions.scale
       const eleList = getElementListByHTML(el.value, { innerWidth })
       // 删当前节点并追加节点
@@ -1319,6 +1321,15 @@ export function getElementListByHTML(
     if (dom.nodeType === 3) {
       const element = convertTextNodeToElement(dom)
       if (element) {
+        const parentNode = <HTMLElement>dom.parentNode
+        const anchorNode = parentNode.nodeName === 'FONT' ? <HTMLElement>parentNode.parentNode : parentNode;
+        const intent = getComputedStyle(anchorNode).textIndent;
+        const intentCount = Math.round(parseFloat(intent) / 32);
+        if (intentCount) {
+          for (let i = 0; i < intentCount; i++) {
+            elementList.push({ type: ElementType.TAB, value: '' });
+          }
+        }
         elementList.push(element)
       }
     } else if (dom.nodeType === 1) {

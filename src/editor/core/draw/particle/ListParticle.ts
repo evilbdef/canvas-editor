@@ -1,13 +1,12 @@
 import { ZERO } from '../../../dataset/constant/Common'
 import { ulStyleMapping } from '../../../dataset/constant/List'
 import { ElementType } from '../../../dataset/enum/Element'
-import { KeyMap } from '../../../dataset/enum/KeyMap'
 import { ListStyle, ListType, UlStyle } from '../../../dataset/enum/List'
 import { DeepRequired } from '../../../interface/Common'
 import { IEditorOption } from '../../../interface/Editor'
 import { IElement, IElementPosition } from '../../../interface/Element'
 import { IRow, IRowElement } from '../../../interface/Row'
-import { getUUID } from '../../../utils'
+import { getListText, getUUID } from '../../../utils'
 import { RangeManager } from '../../range/RangeManager'
 import { Draw } from '../Draw'
 
@@ -18,7 +17,7 @@ export class ListParticle {
 
   // 非递增样式直接返回默认值
   private readonly UN_COUNT_STYLE_WIDTH = 20
-  private readonly MEASURE_BASE_TEXT = '0'
+  // private readonly MEASURE_BASE_TEXT = '0'
   private readonly LIST_GAP = 10
 
   constructor(draw: Draw) {
@@ -131,14 +130,15 @@ export class ListParticle {
 
   public getListStyleWidth(
     ctx: CanvasRenderingContext2D,
-    listElementList: IElement[]
+    listElementList: IElement[],
+    listIndex?: number
   ): number {
     const { scale, checkbox } = this.options
     const startElement = listElementList[0]
     // 非递增样式返回固定值
     if (
-      startElement.listStyle &&
-      startElement.listStyle !== ListStyle.DECIMAL
+      startElement.listType &&
+      startElement.listType === ListType.UL
     ) {
       if (startElement.listStyle === ListStyle.CHECKBOX) {
         return (checkbox.width + this.LIST_GAP) * scale
@@ -146,7 +146,7 @@ export class ListParticle {
       return this.UN_COUNT_STYLE_WIDTH * scale
     }
     // 计算列表数量
-    const count = listElementList.reduce((pre, cur) => {
+    const count = listIndex ?? listElementList.reduce((pre, cur) => {
       if (cur.value === ZERO) {
         pre += 1
       }
@@ -154,11 +154,12 @@ export class ListParticle {
     }, 0)
     if (!count) return 0
     // 以递增样式最大宽度为准
-    const text = `${this.MEASURE_BASE_TEXT.repeat(String(count).length)}${
-      KeyMap.PERIOD
-    }`
+    const text = getListText((startElement as IRowElement).listStyle!, count);
+    // const text = `${this.MEASURE_BASE_TEXT.repeat(String(count).length)}${
+    //   KeyMap.PERIOD
+    // }`
     const textMetrics = ctx.measureText(text)
-    return Math.ceil((textMetrics.width + this.LIST_GAP) * scale)
+    return Math.ceil(textMetrics.width * scale)
   }
 
   public drawListStyle(
@@ -216,11 +217,11 @@ export class ListParticle {
           ulStyleMapping[<UlStyle>(<unknown>startElement.listStyle)] ||
           ulStyleMapping[UlStyle.DISC]
       } else {
-        text = `${listIndex! + 1}${KeyMap.PERIOD}`
+        text = getListText(startElement.listStyle!, listIndex! + 1);
       }
       if (!text) return
       ctx.save()
-      ctx.font = `${defaultSize * scale}px ${defaultFont}`
+      ctx.font = `${(startElement.size ?? defaultSize) * scale}px ${startElement.font ?? defaultFont}`
       ctx.fillText(text, x, y)
       ctx.restore()
     }
