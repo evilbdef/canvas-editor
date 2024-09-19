@@ -108,6 +108,7 @@ import { PageBorder } from './frame/PageBorder'
 import { ITd } from '../../interface/table/Td'
 import { Actuator } from '../actuator/Actuator'
 import { TableOperate } from './particle/table/TableOperate'
+import { marginToArray } from '../../utils/option'
 
 export class Draw {
   private container: HTMLDivElement
@@ -422,15 +423,16 @@ export class Draw {
     return this.getOriginalInnerWidth()
   }
 
-  public getMargins(): IMargin {
-    return <IMargin>this.getOriginalMargins().map(m => m * this.options.scale)
+  public getMargins(): number[] {
+    return <number[]>this.getOriginalMargins().map(m => m * this.options.scale)
   }
 
   public getOriginalMargins(): number[] {
     const { margins, paperDirection } = this.options
-    return paperDirection === PaperDirection.VERTICAL
-      ? margins
-      : [margins[1], margins[2], margins[3], margins[0]]
+    return marginToArray(margins, paperDirection);
+    // return paperDirection === PaperDirection.VERTICAL
+    //   ? margins
+    //   : [margins[1], margins[2], margins[3], margins[0]]
   }
 
   public getPageGap(): number {
@@ -1073,7 +1075,7 @@ export class Draw {
   }
 
   public setPaperMargin(payload: IMargin) {
-    this.options.margins = payload
+    this.options.margins = payload as any
     this.render({
       isSubmitHistory: false,
       isSetCursor: false
@@ -1259,7 +1261,7 @@ export class Draw {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     // 计算列表偏移宽度
-    const listStyleMap = this.listParticle.computeListStyle(ctx, elementList)
+    const listStyleMap = new Map<string, number>(); // this.listParticle.computeListStyle(ctx, elementList)
     const rowList: IRow[] = []
     if (elementList.length) {
       rowList.push({
@@ -1779,7 +1781,8 @@ export class Draw {
         // 列表缩进
         if (element.listId) {
           row.isList = true
-          row.offsetX = listStyleMap.get(element.listId!)
+          // row.offsetX = listStyleMap.get(element.listId!)
+          row.offsetX = this.listParticle.getListStyleWidth(ctx, [element], listIndex + 1)
           row.listIndex = listIndex
         }
         rowList.push(row)

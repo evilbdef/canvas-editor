@@ -1525,7 +1525,7 @@ export class CommandAdapt {
     this.draw.setPaperDirection(payload)
   }
 
-  public getPaperMargin(): number[] {
+  public getPaperMargin(): IMargin {
     return this.options.margins
   }
 

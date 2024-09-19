@@ -531,7 +531,7 @@ export class Position {
         // 是否在头部
         const headStartX =
           headElement.listStyle === ListStyle.CHECKBOX
-            ? this.options.margins[3]
+            ? this.options.margins.bottom
             : headPosition.coordinate.leftTop[0]
         if (x < headStartX) {
           // 头部元素为空元素时无需选中

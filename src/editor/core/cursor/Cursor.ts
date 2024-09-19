@@ -206,8 +206,8 @@ export class Cursor {
     }
     // 可视范围根据参数调整
     const { maskMargin } = this.options
-    rect.top += maskMargin[0]
-    rect.bottom -= maskMargin[2]
+    rect.top += maskMargin.top
+    rect.bottom -= maskMargin.bottom
     // 不在可视范围时，移动滚动条到合适位置
     if (
       !(x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)

@@ -6,6 +6,8 @@ export interface IDialogData {
   label?: string
   name: string
   value?: string
+  name2?: string
+  value2?: string
   options?: { label: string; value: string }[]
   placeholder?: string
   width?: number
@@ -97,30 +99,51 @@ export class Dialog {
         | HTMLInputElement
         | HTMLTextAreaElement
         | HTMLSelectElement
-      if (option.type === 'select') {
-        optionInput = document.createElement('select')
+      if (option.type === 'text-select') {
+        const input = document.createElement('input')
+        input.style.width = '70%'
+        input.name = option.name
+        input.value = option.value || ''
+        input.placeholder = option.placeholder || ''
+        const select = document.createElement('select')
         option.options?.forEach(item => {
           const optionItem = document.createElement('option')
           optionItem.value = item.value
           optionItem.label = item.label
-          optionInput.append(optionItem)
+          select.append(optionItem)
         })
-      } else if (option.type === 'textarea') {
-        optionInput = document.createElement('textarea')
+        select.style.width = '30%'
+        select.name = option.name2!
+        select.value = option.value2 || ''
+        optionInput = document.createElement('div') as any
+        optionInput.append(input)
+        optionInput.append(select)
       } else {
-        optionInput = document.createElement('input')
-        optionInput.type = option.type
-      }
-      if (option.width) {
-        optionInput.style.width = `${option.width}px`
-      }
-      if (option.height) {
-        optionInput.style.height = `${option.height}px`
-      }
-      optionInput.name = option.name
-      optionInput.value = option.value || ''
-      if (!(optionInput instanceof HTMLSelectElement)) {
-        optionInput.placeholder = option.placeholder || ''
+        if (option.type === 'select') {
+          optionInput = document.createElement('select')
+          option.options?.forEach(item => {
+            const optionItem = document.createElement('option')
+            optionItem.value = item.value
+            optionItem.label = item.label
+            optionInput.append(optionItem)
+          })
+        } else if (option.type === 'textarea') {
+          optionInput = document.createElement('textarea')
+        } else {
+          optionInput = document.createElement('input')
+          optionInput.type = option.type
+        }
+        if (option.width) {
+          optionInput.style.width = `${option.width}px`
+        }
+        if (option.height) {
+          optionInput.style.height = `${option.height}px`
+        }
+        optionInput.name = option.name
+        optionInput.value = option.value || ''
+        if (!(optionInput instanceof HTMLSelectElement)) {
+          optionInput.placeholder = option.placeholder || ''
+        }
       }
       optionItemContainer.append(optionInput)
       optionContainer.append(optionItemContainer)
@@ -148,10 +171,17 @@ export class Dialog {
     confirmBtn.type = 'submit'
     confirmBtn.onclick = () => {
       if (onConfirm) {
-        const payload = this.inputList.map<IDialogConfirm>(input => ({
-          name: input.name,
-          value: input.value
-        }))
+        // const payload = this.inputList.map<IDialogConfirm>(input => ({
+        //   name: input.name,
+        //   value: input.value
+        // }))
+        const payload: IDialogConfirm[] = [];
+        optionContainer.querySelectorAll('[name]')?.forEach((input: any) => {
+          payload.push({
+            name: input.name,
+            value: input.value
+          })
+        });
         onConfirm(payload)
       }
       this._dispose()
